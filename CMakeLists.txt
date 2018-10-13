@@ -11,7 +11,7 @@ add_subdirectory(libft)
 add_executable(${PROJECT_NAME}
 		source/main.c
 		source/ssl/ft_sha256.c
-		source/ssl/ft_print_ssl_usage.c)
+		source/ssl/ft_print_ssl_usage.c source/ssl/ft_md5.c)
 target_link_libraries(${PROJECT_NAME} ft)
 target_include_directories(${PROJECT_NAME} PRIVATE ./include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${ft_INCLUDES})
