@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/11 21:23:31 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/14 21:15:12 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/14 23:08:14 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include <ft/string.h>
 #include <ft/io.h>
 #include <ft/memory.h>
-#include <stdio.h>
 
 #define RIGHT_ROT(A, B) (((A) >> (B)) | ((A) << (32 - (B))))
 
@@ -125,15 +124,17 @@ char		*ft_sha256(char const *data, void *extra)
 		h7 = h7 + h;
 	}
 
-	printf("%8.8x", h0);
-	printf("%8.8x", h1);
-	printf("%8.8x", h2);
-	printf("%8.8x", h3);
-	printf("%8.8x", h4);
-	printf("%8.8x", h5);
-	printf("%8.8x", h6);
-	printf("%8.8x\n", h7);
+	char *digest = ft_strnew(64, 0);
+
+	ft_sprintf(digest, "%8.8x", h0);
+	ft_sprintf(digest + 8, "%8.8x", h1);
+	ft_sprintf(digest + 16, "%8.8x", h2);
+	ft_sprintf(digest + 24, "%8.8x", h3);
+	ft_sprintf(digest + 32, "%8.8x", h4);
+	ft_sprintf(digest + 40, "%8.8x", h5);
+	ft_sprintf(digest + 48, "%8.8x", h6);
+	ft_sprintf(digest + 56, "%8.8x\n", h7);
 
 	free(msg);
-	return (0);
+	return (digest);
 }
