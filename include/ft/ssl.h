@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/11 21:29:46 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/14 22:55:14 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/15 16:46:19 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,6 @@
 # include <stdint.h>
 
 char			*ft_sha256(char const *data, void *extra);
-char			*ft_md5(char const *data, void *extra);
+char *ft_md5(char const *ctx);
 
 #endif

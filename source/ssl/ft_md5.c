@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/13 14:30:17 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/14 23:07:31 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/15 18:43:46 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,18 +17,24 @@
 
 #define LEFT_ROTATE(A,B) ((A << B) | (A >> (32 - B)))
 
-char		*ft_md5(char const *data, void *extra)
+void				print_ctx(uint8_t *msg, size_t len)
 {
-	(void)extra;
+	for (size_t i = 0; i < len; ++i)
+		ft_printf("%1.1s %8.8b %2.2x\n", (msg + i), msg[i], msg[i]);
+	ft_printf("\n");
+}
 
-	uint32_t const	s[64] = {
+char			*ft_md5(char const *ctx)
+{
+	// Define array of constants
+	uint32_t const	steps[64] = {
 			7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
 			5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
 			4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
 			6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21
 	};
 
-	uint32_t const	K[64] = {
+	uint32_t const	constants[64] = {
 			0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
 			0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
 			0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -47,64 +53,78 @@ char		*ft_md5(char const *data, void *extra)
 			0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 	};
 
-	size_t data_len = ft_strlen(data);
-	size_t msg_len_bits = (data_len * 8) + 1;
+	// Pad tmp message appropriately
+	uint64_t ctx_len = ft_strlen(ctx);
+	uint64_t ctx_len_bits = (ctx_len * 8);
 
-	size_t to_fill = 448 - (msg_len_bits % 512);
+	uint64_t padd_len_bits = ctx_len_bits + 1;
+	while (padd_len_bits % 512 != 448)
+		padd_len_bits++;
 
-	size_t padded_bits_len = msg_len_bits + to_fill + 64;
-	size_t padded_len = padded_bits_len / 8;
+	uint64_t padd_ctx_len_bits = padd_len_bits + 64;
+	uint64_t padd_ctx_len = padd_ctx_len_bits / 8;
 
-	uint8_t *data_padded = (uint8_t*)ft_strnew(padded_len, 0);
-	ft_strncpy((char*)data_padded, data, data_len);
+	uint8_t *padd_ctx = (uint8_t*)ft_strnew(padd_ctx_len, 0);
+	ft_strncpy((char*)padd_ctx, ctx, ctx_len);
 
-	data_padded[data_len] |= (uint8_t)0x80;
+	// Set 1 bit at the end of the ctx
+	padd_ctx[ctx_len] = (uint8_t)0x80;
 
-	data_padded[padded_len - 1] = *((uint8_t*)&data_len);
-	data_padded[padded_len - 2] = *((uint8_t*)&data_len + 1);
-	data_padded[padded_len - 3] = *((uint8_t*)&data_len + 2);
-	data_padded[padded_len - 4] = *((uint8_t*)&data_len + 3);
+	// Set 2^64 last bits with ctx_len_bits
+	padd_ctx[padd_ctx_len - 8] = (uint8_t)ctx_len_bits;
+	padd_ctx[padd_ctx_len - 7] = (uint8_t)(ctx_len_bits >> 8);
+	padd_ctx[padd_ctx_len - 6] = (uint8_t)(ctx_len_bits >> 16);
+	padd_ctx[padd_ctx_len - 5] = (uint8_t)(ctx_len_bits >> 24);
+	padd_ctx[padd_ctx_len - 4] = (uint8_t)(ctx_len_bits >> 32);
+	padd_ctx[padd_ctx_len - 3] = (uint8_t)(ctx_len_bits >> 40);
+	padd_ctx[padd_ctx_len - 2] = (uint8_t)(ctx_len_bits >> 48);
+	padd_ctx[padd_ctx_len - 1] = (uint8_t)(ctx_len_bits >> 56);
+
+	(void)print_ctx;
 
 	uint32_t a0 = 0x67452301;
 	uint32_t b0 = 0xefcdab89;
 	uint32_t c0 = 0x98badcfe;
 	uint32_t d0 = 0x10325476;
 
-	uint32_t M[16];
-	for (size_t i = 0; i < padded_len; i += 64)
+	uint32_t chunk[16] = {0};
+	for (size_t chunk_move = 0; chunk_move < padd_ctx_len; chunk_move += 64)
 	{
-		for (size_t j = 0; j < 16; ++j)
-			M[j] = *((uint32_t*)(data_padded + i) + j);
+		uint8_t *tmp = padd_ctx + chunk_move;
+		for (size_t i = 0, j = 0; i < 16; ++i, j += 4)
+			chunk[i] = (tmp[j]) + (tmp[j + 1] << 8) + (tmp[j + 2] << 16) +
+					(tmp[j + 3] << 24);
+
 		uint32_t A = a0, B = b0, C = c0, D = d0;
-		for (uint32_t k = 0; k < 64; ++k)
+		for (uint32_t iter = 0; iter < 64; ++iter)
 		{
 			uint32_t F, g;
-			if (k < 16)
+			if (iter < 16)
 			{
 				F = (B & C) | ((~B) & D);
-				g = k;
+				g = iter;
 			}
-			else if (k >= 16 && k < 32)
+			else if (iter >= 16 && iter < 32)
 			{
 				F = (D & B) | ((~D) & C);
-				g = (5 * k + 1) % 16;
+				g = (5 * iter + 1) % 16;
 			}
-			else if (k >= 32 && k < 48)
+			else if (iter >= 32 && iter < 48)
 			{
 				F = B ^ C ^ D;
-				g = (3 * k + 5) % 16;
+				g = (3 * iter + 5) % 16;
 			}
 			else
 			{
 				F = C ^ (B | (~D));
-				g = (7 * k) % 16;
+				g = (7 * iter) % 16;
 			}
 
-			F = F + A + K[k] + M[g];
+			F = F + A + constants[iter] + chunk[g];
 			A = D;
 			D = C;
 			C = B;
-			B = B + LEFT_ROTATE(F, s[k]);
+			B = B + LEFT_ROTATE(F, steps[iter]);
 		}
 
 		a0 += A;
@@ -113,16 +133,18 @@ char		*ft_md5(char const *data, void *extra)
 		d0 += D;
 	}
 
-	uint32_t digest[4] = {a0, b0, c0, d0};
-	char	ret[16];
-	for (size_t i = 0; i < 4; ++i)
-		for (size_t j = 0; j < 4; ++j)
-			ret[i * 4 + j] = *((uint8_t*)(digest + i) + j);
+	uint8_t hash[16];
+	for (size_t i = 0; i < 4; ++i) {
+		hash[i] = (uint8_t)((a0 >> (i * 8)) & 0x000000ff);
+		hash[i + 4] = (uint8_t)((b0 >> (i * 8)) & 0x000000ff);
+		hash[i + 8] = (uint8_t)((c0 >> (i * 8)) & 0x000000ff);
+		hash[i + 12] = (uint8_t)((d0 >> (i * 8)) & 0x000000ff);
+	}
 
-	char *ret_12 = ft_strnew(32, 0);
+	char *s_hash = ft_strnew(32, 0);
 	for (size_t i = 0; i < 16; ++i)
-		ft_sprintf(ret_12 + (i * 2), "%2.2x", (uint8_t) ret[i]);
+		ft_sprintf(s_hash + (i * 2), "%2.2x", hash[i]);
 
-	free(data_padded);
-	return (ret_12);
+	free(padd_ctx);
+	return (s_hash);
 }

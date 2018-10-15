@@ -7,6 +7,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${CMAKE_C_FLAGS} -g -DDEBUG")
 
 add_subdirectory(libft)
+add_subdirectory(github-version)
 
 add_executable(${PROJECT_NAME}
 		source/main.c
