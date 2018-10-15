@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/11 21:23:31 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/14 23:08:14 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/15 19:15:47 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,40 +50,44 @@ char		*ft_sha256(char const *data, void *extra)
 	};
 
 	uint64_t data_len = ft_strlen(data);
+	uint64_t data_len_bits = data_len * 8;
 
-	uint64_t msg_len_bits = (data_len * 8);
-	msg_len_bits += 1;
-	uint64_t to_fill = (448 - msg_len_bits % 512);
-	msg_len_bits += to_fill + 64;
+	uint64_t msg_len_bits = (data_len * 8) + 1;
+	while (msg_len_bits % 512 != 448)
+		msg_len_bits++;
+	msg_len_bits += 64;
 	uint64_t msg_len = msg_len_bits / 8;
 
 	uint8_t *msg = (uint8_t*)ft_strnew(msg_len, 0);
 	ft_strncpy((char*)msg, data, data_len);
 	msg[data_len] = (uint8_t)0x80;
 
-	msg[msg_len - 1] = *((uint8_t*)&data_len);
-	msg[msg_len - 2] = *((uint8_t*)&data_len + 1);
-	msg[msg_len - 3] = *((uint8_t*)&data_len + 2);
-	msg[msg_len - 4] = *((uint8_t*)&data_len + 3);
-	msg[msg_len - 5] = *((uint8_t*)&data_len + 4);
-	msg[msg_len - 6] = *((uint8_t*)&data_len + 5);
-	msg[msg_len - 7] = *((uint8_t*)&data_len + 6);
-	msg[msg_len - 8] = *((uint8_t*)&data_len + 7);
+	msg[msg_len - 1] = (uint8_t)data_len_bits;
+	msg[msg_len - 2] = (uint8_t)(data_len_bits >> 8);
+	msg[msg_len - 3] = (uint8_t)(data_len_bits >> 16);
+	msg[msg_len - 4] = (uint8_t)(data_len_bits >> 24);
+	msg[msg_len - 5] = (uint8_t)(data_len_bits >> 32);
+	msg[msg_len - 6] = (uint8_t)(data_len_bits >> 40);
+	msg[msg_len - 7] = (uint8_t)(data_len_bits >> 48);
+	msg[msg_len - 8] = (uint8_t)(data_len_bits >> 56);
 
-	for (size_t chunk_i = 0; chunk_i < msg_len; chunk_i += 64)
+	for (size_t chunk_move = 0; chunk_move < msg_len; chunk_move += 64)
 	{
 		size_t i, j;
-		uint32_t w[64] = {0};
+		uint32_t chunk[64] = {0};
+
+		uint8_t *tmp = msg + chunk_move;
 		for (i = 0, j = 0; i < 16; ++i, j += 4)
-			w[i] = (msg[j] << 24) | (msg[j + 1] << 16) |
-					(msg[j + 2] << 8) | (msg[j + 3]);
+			chunk[i] = (tmp[j] << 24) | (tmp[j + 1] << 16) | (tmp[j + 2] << 8)
+					| (tmp[j + 3]);
+
 		for (; i < 64; ++i)
 		{
-			uint32_t s0 = RIGHT_ROT(w[i - 15], 7) ^RIGHT_ROT(w[i - 15], 18) ^
-					(w[i - 15] >> 3);
-			uint32_t s1 = RIGHT_ROT(w[i - 2], 17) ^RIGHT_ROT(w[i - 2], 19) ^
-					(w[i - 2] >> 10);
-			w[i] = w[i - 16] + s0 + w[i - 7] + s1;
+			uint32_t s0 = RIGHT_ROT(chunk[i - 15], 7) ^RIGHT_ROT(chunk[i - 15], 18) ^
+					(chunk[i - 15] >> 3);
+			uint32_t s1 = RIGHT_ROT(chunk[i - 2], 17) ^RIGHT_ROT(chunk[i - 2], 19) ^
+					(chunk[i - 2] >> 10);
+			chunk[i] = chunk[i - 16] + s0 + chunk[i - 7] + s1;
 		}
 
 		uint32_t a = h0;
@@ -99,7 +103,7 @@ char		*ft_sha256(char const *data, void *extra)
 		{
 			uint32_t S1 = RIGHT_ROT(e, 6) ^ RIGHT_ROT(e, 11) ^ RIGHT_ROT(e, 25);
 			uint32_t ch = (e & f) ^ ((~e) & g);
-			uint32_t temp1 = h + S1 + ch + K[j] + w[j];
+			uint32_t temp1 = h + S1 + ch + K[j] + chunk[j];
 			uint32_t S0 = RIGHT_ROT(a, 2) ^ RIGHT_ROT(a, 13) ^ RIGHT_ROT(a, 22);
 			uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
 			uint32_t temp2 = S0 + maj;
