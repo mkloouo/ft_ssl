@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/11 21:23:31 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/15 19:15:47 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/15 19:26:10 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,8 @@
 
 #define RIGHT_ROT(A, B) (((A) >> (B)) | ((A) << (32 - (B))))
 
-char		*ft_sha256(char const *data, void *extra)
+char		*ft_sha256(char const *data)
 {
-	(void)extra;
 	uint32_t h0 = 0x6a09e667;
 	uint32_t h1 = 0xbb67ae85;
 	uint32_t h2 = 0x3c6ef372;

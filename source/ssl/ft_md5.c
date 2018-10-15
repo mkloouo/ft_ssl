@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/13 14:30:17 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/15 18:43:46 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/15 19:25:34 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,16 +17,8 @@
 
 #define LEFT_ROTATE(A,B) ((A << B) | (A >> (32 - B)))
 
-void				print_ctx(uint8_t *msg, size_t len)
-{
-	for (size_t i = 0; i < len; ++i)
-		ft_printf("%1.1s %8.8b %2.2x\n", (msg + i), msg[i], msg[i]);
-	ft_printf("\n");
-}
-
 char			*ft_md5(char const *ctx)
 {
-	// Define array of constants
 	uint32_t const	steps[64] = {
 			7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
 			5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
@@ -53,7 +45,6 @@ char			*ft_md5(char const *ctx)
 			0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 	};
 
-	// Pad tmp message appropriately
 	uint64_t ctx_len = ft_strlen(ctx);
 	uint64_t ctx_len_bits = (ctx_len * 8);
 
@@ -67,10 +58,8 @@ char			*ft_md5(char const *ctx)
 	uint8_t *padd_ctx = (uint8_t*)ft_strnew(padd_ctx_len, 0);
 	ft_strncpy((char*)padd_ctx, ctx, ctx_len);
 
-	// Set 1 bit at the end of the ctx
 	padd_ctx[ctx_len] = (uint8_t)0x80;
 
-	// Set 2^64 last bits with ctx_len_bits
 	padd_ctx[padd_ctx_len - 8] = (uint8_t)ctx_len_bits;
 	padd_ctx[padd_ctx_len - 7] = (uint8_t)(ctx_len_bits >> 8);
 	padd_ctx[padd_ctx_len - 6] = (uint8_t)(ctx_len_bits >> 16);
@@ -79,8 +68,6 @@ char			*ft_md5(char const *ctx)
 	padd_ctx[padd_ctx_len - 3] = (uint8_t)(ctx_len_bits >> 40);
 	padd_ctx[padd_ctx_len - 2] = (uint8_t)(ctx_len_bits >> 48);
 	padd_ctx[padd_ctx_len - 1] = (uint8_t)(ctx_len_bits >> 56);
-
-	(void)print_ctx;
 
 	uint32_t a0 = 0x67452301;
 	uint32_t b0 = 0xefcdab89;
