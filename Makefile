@@ -6,7 +6,7 @@
 #    By: modnosum <modnosum@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/16 20:46:58 by modnosum          #+#    #+#              #
-#    Updated: 2018/10/14 22:50:18 by modnosum         ###   ########.fr        #
+#    Updated: 2018/10/17 01:49:26 by modnosum         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ OBJ_DIR		:= build
 SRC_EXT		:= c
 OBJ_EXT		:= o
 
-MFLAGS		?= --no-print-directory
+MFLAGS		+= --no-print-directory
 
 NAME		:= ft_ssl
 
@@ -45,24 +45,25 @@ c: clean
 clean:
 	@$(MAKE) $(MFLAGS) -C $(libft_PATH) clean
 	@rm -fr $(OBJ_DIR)
-	@$(call REMOVED_FILE,$(OBJ_DIR))
+	@echo "Removed ft_ssl build directory."
 f: fclean
 fclean: clean
 	@$(MAKE) $(MFLAGS) -C $(libft_PATH) fclean
 	@rm -fr $(NAME)
-	@$(call REMOVED_FILE,$(NAME))
+	@echo "Removed ft_ssl executable."
 re: fclean all
 
 $(OBJ_DIR):
 	@mkdir -p $(DIRS)
+	@echo "Created ft_ssl build directory."
 
 $(OBJ_DIR)/%.$(OBJ_EXT): $(SRC_DIR)/%.$(SRC_EXT) | $(OBJ_DIR)
 	@$(CC) -o $@ -c $< $(IFLAGS) $(CFLAGS)
-	@$(call CREATED_FILE,$@,$<);
 
 $(NAME): $(OBJS) | $(libft_NAME)
+	@echo "Finished compiling ft_ssl object files."
 	@$(CC) -o $@ $^ $(LFLAGS) $(IFLAGS) $(CFLAGS)
-	@$(call FINISHED_FILE,$@);
+	@echo "Finished ft_ssl."
 
 $(libft_NAME): $(libft_DEPS)
 	@$(MAKE) $(MFLAGS) -C $(libft_PATH) all

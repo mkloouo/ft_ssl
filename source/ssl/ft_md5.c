@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   ft_md5.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
+/*   By: modnosum <modnosum@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/13 14:30:17 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/15 19:25:34 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/17 02:11:17 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft/ssl.h>
+
 #include <ft/string.h>
 #include <ft/io.h>
 #include <ft/memory.h>
