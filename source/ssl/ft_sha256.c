@@ -136,7 +136,7 @@ char		*ft_sha256(char const *data)
 	ft_sprintf(digest + 32, "%8.8x", h4);
 	ft_sprintf(digest + 40, "%8.8x", h5);
 	ft_sprintf(digest + 48, "%8.8x", h6);
-	ft_sprintf(digest + 56, "%8.8x\n", h7);
+	ft_sprintf(digest + 56, "%8.8x", h7);
 
 	free(msg);
 	return (digest);
