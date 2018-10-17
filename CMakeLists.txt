@@ -9,9 +9,10 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${CMAKE_C_FLAGS} -g -DDEBUG")
 add_subdirectory(libft)
 
 add_executable(${PROJECT_NAME}
-		source/main.c
+		source/ssl/ft_md5.c
 		source/ssl/ft_sha256.c
-		source/ssl/ft_md5.c source/ssl/ssl.c source/ssl/ssl_print_usage.c source/ssl/ssl_parse_flags.c source/ssl/ssl_run_command.c)
+		source/ssl/ssl.c
+		source/main.c)
 target_link_libraries(${PROJECT_NAME} ft)
 target_include_directories(${PROJECT_NAME} PRIVATE ./include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${ft_INCLUDES})
