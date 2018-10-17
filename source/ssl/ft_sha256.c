@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_sha256.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
+/*   By: modnosum <modnosum@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/11 21:23:31 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/15 19:26:10 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/17 05:43:35 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,127 +17,198 @@
 #include <ft/memory.h>
 
 #define RIGHT_ROT(A, B) (((A) >> (B)) | ((A) << (32 - (B))))
+#define STEP0(A) (RIGHT_ROT(A, 2) ^ RIGHT_ROT(A, 13) ^ RIGHT_ROT(A, 22))
+#define STEP1(E) (RIGHT_ROT(E, 6) ^ RIGHT_ROT(E, 11) ^ RIGHT_ROT(E, 25))
+#define Ch(E, F, G) ((E & F) ^ ((~E) & G))
+#define Maj(A, B, C) ((A & B) ^ (A & C) ^ (B & C))
 
-char		*ft_sha256(char const *data)
+uint32_t const g_sha256_constants[64] = {
+	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
+	0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+	0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+	0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
+	0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+	0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
+	0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+	0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+	0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+	0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
+	0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+	0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
+	0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+	0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+};
+
+typedef struct	s_ctx_data
 {
-	uint32_t h0 = 0x6a09e667;
-	uint32_t h1 = 0xbb67ae85;
-	uint32_t h2 = 0x3c6ef372;
-	uint32_t h3 = 0xa54ff53a;
-	uint32_t h4 = 0x510e527f;
-	uint32_t h5 = 0x9b05688c;
-	uint32_t h6 = 0x1f83d9ab;
-	uint32_t h7 = 0x5be0cd19;
+	uint8_t		*ctx;
+	uint64_t	len;
+	uint64_t	bitlen;
+}				t_ctx_data;
 
-	uint32_t const K[64] = {
-		0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
-		0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-		0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
-		0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-		0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
-		0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-		0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
-		0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-		0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
-		0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-		0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
-		0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-		0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
-		0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-		0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
-		0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-	};
+typedef struct	s_sha256ctx
+{
+	t_ctx_data	data;
+	uint32_t	state[8];
+}				t_sha256ctx;
 
-	uint64_t data_len = ft_strlen(data);
-	uint64_t data_len_bits = data_len * 8;
+void			ssl_init_ctx_data_helper(t_ctx_data *ctx_data, char const *data,
+				uint64_t data_len)
+{
+	ctx_data->bitlen = (data_len * 8) + 1;
+	while ((ctx_data->bitlen % 512) != 448)
+		ctx_data->bitlen++;
+	ctx_data->bitlen += 64;
+	ctx_data->len = ctx_data->bitlen / 8;
+	ctx_data->ctx = (uint8_t*)ft_strnew(ctx_data->len, 0);
+	ft_strncpy((char*)ctx_data->ctx, data, data_len);
+	ctx_data->ctx[data_len] = (uint8_t)0x80;
+}
 
-	uint64_t msg_len_bits = (data_len * 8) + 1;
-	while (msg_len_bits % 512 != 448)
-		msg_len_bits++;
-	msg_len_bits += 64;
-	uint64_t msg_len = msg_len_bits / 8;
+void			ssl_init_ctx_data(t_ctx_data *ctx_data, char const *data,
+				t_bool little_endian)
+{
+	uint64_t	data_len;
+	uint64_t	data_bitlen;
+	int16_t		from;
+	int16_t		to;
+	int16_t		bit_step;
 
-	uint8_t *msg = (uint8_t*)ft_strnew(msg_len, 0);
-	ft_strncpy((char*)msg, data, data_len);
-	msg[data_len] = (uint8_t)0x80;
-
-	msg[msg_len - 1] = (uint8_t)data_len_bits;
-	msg[msg_len - 2] = (uint8_t)(data_len_bits >> 8);
-	msg[msg_len - 3] = (uint8_t)(data_len_bits >> 16);
-	msg[msg_len - 4] = (uint8_t)(data_len_bits >> 24);
-	msg[msg_len - 5] = (uint8_t)(data_len_bits >> 32);
-	msg[msg_len - 6] = (uint8_t)(data_len_bits >> 40);
-	msg[msg_len - 7] = (uint8_t)(data_len_bits >> 48);
-	msg[msg_len - 8] = (uint8_t)(data_len_bits >> 56);
-
-	for (size_t chunk_move = 0; chunk_move < msg_len; chunk_move += 64)
+	data_len = ft_strlen(data);
+	data_bitlen = data_len * 8;
+	ssl_init_ctx_data_helper(ctx_data, data, data_len);
+	from = (little_endian ? 8 : 1);
+	to = (little_endian ? 1 : 8);
+	bit_step = 0;
+	while (42)
 	{
-		size_t i, j;
-		uint32_t chunk[64] = {0};
-
-		uint8_t *tmp = msg + chunk_move;
-		for (i = 0, j = 0; i < 16; ++i, j += 4)
-			chunk[i] = (tmp[j] << 24) | (tmp[j + 1] << 16) | (tmp[j + 2] << 8)
-					| (tmp[j + 3]);
-
-		for (; i < 64; ++i)
+		ctx_data->ctx[ctx_data->len - from] = (uint8_t)
+			(data_bitlen >> bit_step);
+		from += (little_endian ? -1 : 1);
+		bit_step += 8;
+		if (from == to)
 		{
-			uint32_t s0 = RIGHT_ROT(chunk[i - 15], 7) ^RIGHT_ROT(chunk[i - 15], 18) ^
-					(chunk[i - 15] >> 3);
-			uint32_t s1 = RIGHT_ROT(chunk[i - 2], 17) ^RIGHT_ROT(chunk[i - 2], 19) ^
-					(chunk[i - 2] >> 10);
-			chunk[i] = chunk[i - 16] + s0 + chunk[i - 7] + s1;
+			ctx_data->ctx[ctx_data->len - from] = (uint8_t)
+				(data_bitlen >> bit_step);
+			break ;
 		}
-
-		uint32_t a = h0;
-		uint32_t b = h1;
-		uint32_t c = h2;
-		uint32_t d = h3;
-		uint32_t e = h4;
-		uint32_t f = h5;
-		uint32_t g = h6;
-		uint32_t h = h7;
-
-		for (j = 0; j < 64; ++j)
-		{
-			uint32_t S1 = RIGHT_ROT(e, 6) ^ RIGHT_ROT(e, 11) ^ RIGHT_ROT(e, 25);
-			uint32_t ch = (e & f) ^ ((~e) & g);
-			uint32_t temp1 = h + S1 + ch + K[j] + chunk[j];
-			uint32_t S0 = RIGHT_ROT(a, 2) ^ RIGHT_ROT(a, 13) ^ RIGHT_ROT(a, 22);
-			uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
-			uint32_t temp2 = S0 + maj;
-
-			h = g;
-			g = f;
-			f = e;
-			e = d + temp1;
-			d = c;
-			c = b;
-			b = a;
-			a = temp1 + temp2;
-		}
-
-		h0 = h0 + a;
-		h1 = h1 + b;
-		h2 = h2 + c;
-		h3 = h3 + d;
-		h4 = h4 + e;
-		h5 = h5 + f;
-		h6 = h6 + g;
-		h7 = h7 + h;
 	}
+}
 
-	char *digest = ft_strnew(64, 0);
+void			ssl_init_sha256ctx(t_sha256ctx *ctx, char const *data)
+{
+	ssl_init_ctx_data(&ctx->data, data, FALSE);
+	ctx->state[0] = 0x6a09e667;
+	ctx->state[1] = 0xbb67ae85;
+	ctx->state[2] = 0x3c6ef372;
+	ctx->state[3] = 0xa54ff53a;
+	ctx->state[4] = 0x510e527f;
+	ctx->state[5] = 0x9b05688c;
+	ctx->state[6] = 0x1f83d9ab;
+	ctx->state[7] = 0x5be0cd19;
+}
 
-	ft_sprintf(digest, "%8.8x", h0);
-	ft_sprintf(digest + 8, "%8.8x", h1);
-	ft_sprintf(digest + 16, "%8.8x", h2);
-	ft_sprintf(digest + 24, "%8.8x", h3);
-	ft_sprintf(digest + 32, "%8.8x", h4);
-	ft_sprintf(digest + 40, "%8.8x", h5);
-	ft_sprintf(digest + 48, "%8.8x", h6);
-	ft_sprintf(digest + 56, "%8.8x", h7);
+void			ssl_fill_chunk(uint32_t *chunk, uint64_t chunk_move,
+				t_sha256ctx *ctx)
+{
+	uint64_t	i;
+	uint64_t	j;
+	uint32_t	s0;
+	uint32_t	s1;
+	uint8_t		*moved;
 
-	free(msg);
+	moved = ctx->data.ctx + chunk_move + (i = 0);
+	j = 0;
+	while (i < 16)
+	{
+		chunk[i] = (moved[j] << 24) | (moved[j + 1] << 16) |
+			(moved[j + 2] << 8) | (moved[j + 3]);
+		j += 4;
+		++i;
+	}
+	while (i < 64)
+	{
+		s0 = RIGHT_ROT(chunk[i - 15], 7) ^ RIGHT_ROT(chunk[i - 15], 18) ^
+				(chunk[i - 15] >> 3);
+		s1 = RIGHT_ROT(chunk[i - 2], 17) ^ RIGHT_ROT(chunk[i - 2], 19) ^
+				(chunk[i - 2] >> 10);
+		chunk[i] = chunk[i - 16] + s0 + chunk[i - 7] + s1;
+		++i;
+	}
+}
+
+void			ssl_update_state_helper(uint32_t *ts, uint32_t t1, uint32_t t2)
+{
+	int64_t		j;
+
+	j = 7;
+	while (j >= 0)
+	{
+		if (j != 4 && j != 0)
+			ts[j] = ts[j - 1];
+		else if (j == 4)
+			ts[j] = ts[j - 1] + t1;
+		else if (j == 0)
+			ts[j] = t1 + t2;
+		--j;
+	}
+}
+
+void			ssl_update_state(t_sha256ctx *ctx, uint32_t *ts,
+				uint32_t *chunk)
+{
+	int64_t		i;
+	uint32_t	t1;
+	uint32_t	t2;
+
+	i = 0;
+	while (i < 64)
+	{
+		t1 = ts[7] + STEP1(ts[4]) + Ch(ts[4], ts[5], ts[6]) +
+			g_sha256_constants[i] + chunk[i];
+		t2 = STEP0(ts[0]) + Maj(ts[0], ts[1], ts[2]);
+		ssl_update_state_helper(ts, t1, t2);
+		++i;
+	}
+	i = 0;
+	while (i < 8)
+	{
+		ctx->state[i] += ts[i];
+		++i;
+	}
+}
+
+char			*ssl_get_digest(t_sha256ctx *ctx)
+{
+	char		*digest;
+
+	digest = ft_strnew(64, 0);
+	for (size_t i = 0, j = 0; i < 8; ++i, j += 8)
+		ft_sprintf(digest + j, "%8.8x", ctx->state[i]);
+	return (digest);
+}
+
+char			*ft_sha256(char const *data)
+{
+	uint64_t	chunk_move;
+	uint32_t	chunk[64];
+	t_sha256ctx	ctx;
+	uint32_t	ts[8];
+	char		*digest;
+
+	ssl_init_sha256ctx(&ctx, data);
+	chunk_move = 0;
+	while (chunk_move < ctx.data.len)
+	{
+		ft_memset(chunk, 0, sizeof(uint32_t) * 64);
+		ssl_fill_chunk(chunk, chunk_move, &ctx);
+		ft_memcpy(ts, ctx.state, sizeof(uint32_t) * 8);
+		ssl_update_state(&ctx, ts, chunk);
+		chunk_move += 64;
+	}
+	digest = ssl_get_digest(&ctx);
+	free(ctx.data.ctx);
 	return (digest);
 }

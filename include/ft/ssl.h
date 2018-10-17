@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/11 21:29:46 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/17 03:02:49 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/17 04:07:52 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ typedef struct			s_ssl
 	char const			*program;
 }						t_ssl;
 
-char					*ft_sha256(char const *data);
+char					*ft_sha256(char const *ctx);
 char					*ft_md5(char const *ctx);
 
 extern t_hash_fn_name	g_hash_fn_name_arr[];
