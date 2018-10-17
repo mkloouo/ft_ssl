@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/14 16:09:58 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/17 04:07:15 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/17 20:50:03 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,16 +195,23 @@ static void			ssl_run_args(t_ssl *ssl, size_t i, char **av)
 	}
 }
 
+void				init_ssl(t_ssl *ssl, char const *program)
+{
+	ssl->flags = (t_ssl_flags){0, 0, 0};
+	ssl->fn_name = (t_hash_fn_name){0, 0, 0};
+	ssl->program = program;
+}
+
 int					main(int ac, char **av)
 {
 	t_ssl			ssl;
 	size_t			i;
 
+	init_ssl(&ssl, av[0]);
 	if (ac == 1)
-		return (ssl_print_usage(av[0]));
-	ssl.program = av[0];
+		return (ssl_print_usage(ssl.program));
 	if (!ssl_get_hash_fn_name(&ssl.fn_name, av[1]))
-		return (ssl_print_invalid_fn(av[0], av[1]));
+		return (ssl_print_invalid_fn(ssl.program, av[1]));
 	i = ssl_parse_flags(&ssl.flags, av);
 	if (ac == (2 + ssl.flags.is_p + ssl.flags.is_q + ssl.flags.is_r)
 		|| ssl.flags.is_p)
