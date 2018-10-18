@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/13 14:30:17 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/18 05:20:07 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/18 05:39:03 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ uint32_t const	g_md5_constants[] = {
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
 
-void			md5_init_ctx(t_md5ctx *ctx, char const *data)
+void			ft_md5_init_ctx(t_md5ctx *ctx, char const *data)
 {
 	init_ctx_data(&ctx->data, data, TRUE);
 	ctx->state[0] = 0x67452301;
@@ -51,7 +51,7 @@ void			md5_init_ctx(t_md5ctx *ctx, char const *data)
 	ctx->state[3] = 0x10325476;
 }
 
-void			md5_fill_chunk(uint32_t *chunk, uint64_t chunk_move,
+void			ft_md5_fill_chunk(uint32_t *chunk, uint64_t chunk_move,
 				t_md5ctx *ctx)
 {
 	uint64_t	i;
@@ -70,54 +70,7 @@ void			md5_fill_chunk(uint32_t *chunk, uint64_t chunk_move,
 	}
 }
 
-void			md5_update_state_h(uint32_t const *ts, uint32_t *t1,
-				uint32_t *t2, uint32_t i)
-{
-	if (i < 16)
-	{
-		MD5_FF(ts[1], ts[2], ts[3], *t1, *t2, i);
-	}
-	else if (i >= 16 && i < 32)
-	{
-		MD5_GG(ts[1], ts[2], ts[3], *t1, *t2, i);
-	}
-	else if (i >= 32 && i < 48)
-	{
-		MD5_HH(ts[1], ts[2], ts[3], *t1, *t2, i);
-	}
-	else
-	{
-		MD5_II(ts[1], ts[2], ts[3], *t1, *t2, i);
-	}
-}
-
-void			md5_update_state(t_md5ctx *ctx, uint32_t *ts,
-				uint32_t const *chunk)
-{
-	uint32_t	i;
-	uint32_t	t1;
-	uint32_t	t2;
-
-	i = 0;
-	while (i < 64)
-	{
-		md5_update_state_h(ts, &t1, &t2, i);
-		t1 = t1 + ts[0] + g_md5_constants[i] + chunk[t2];
-		ts[0] = ts[3];
-		ts[3] = ts[2];
-		ts[2] = ts[1];
-		ts[1] += SSL_LR(t1, g_md5_steps[i]);
-		++i;
-	}
-	i = 0;
-	while (i < 4)
-	{
-		ctx->state[i] += ts[i];
-		++i;
-	}
-}
-
-char			*md5_get_digest(t_md5ctx *ctx)
+char			*ft_md5_get_digest(t_md5ctx *ctx)
 {
 	char		*digest;
 	uint32_t	i;
@@ -150,17 +103,17 @@ char			*ft_md5(char const *data)
 	uint32_t	ts[4];
 	char		*digest;
 
-	md5_init_ctx(&ctx, data);
+	ft_md5_init_ctx(&ctx, data);
 	ft_memset(chunk, 0, sizeof(uint32_t) * 16);
 	chunk_move = 0;
 	while (chunk_move < ctx.data.len)
 	{
-		md5_fill_chunk(chunk, chunk_move, &ctx);
+		ft_md5_fill_chunk(chunk, chunk_move, &ctx);
 		ft_memcpy(ts, ctx.state, sizeof(uint32_t) * 4);
-		md5_update_state(&ctx, ts, chunk);
+		ft_md5_update_state(&ctx, ts, chunk);
 		chunk_move += 64;
 	}
-	digest = md5_get_digest(&ctx);
+	digest = ft_md5_get_digest(&ctx);
 	free(ctx.data.ctx);
 	return (digest);
 }
