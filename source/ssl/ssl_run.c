@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/18 06:24:35 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/18 06:27:48 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/18 06:27:49 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void			ssl_run_stdin(t_hash_fn_name *fn_name, t_ssl_flags *flags)
 	char		*digest;
 
 	stdin_contents = ft_readfd(IO_STDIN);
-	if (flags->p_flag)
+	if (flags && flags->p_flag)
 		ft_printf("%s", stdin_contents);
 	digest = fn_name->fn(stdin_contents);
 	ft_printf("%s\n", digest);

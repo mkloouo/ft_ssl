@@ -14,7 +14,8 @@
 
 t_hash_fn_name g_hash_fn_name_arr[] = {
 	{ft_md5, "md5", "MD5"},
-	{ft_sha256, "sha256", "SHA256"}
+	{ft_sha256, "sha256", "SHA256"},
+	{0, 0, 0}
 };
 
 void				init_ssl(t_ssl *ssl, char const *program)
