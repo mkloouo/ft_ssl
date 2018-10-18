@@ -12,7 +12,7 @@ add_executable(${PROJECT_NAME}
 		source/ssl/ft_md5.c
 		source/ssl/ft_sha256.c
 		source/ssl/ssl.c
-		source/main.c)
+		source/main.c source/ssl/ctx_data.c)
 target_link_libraries(${PROJECT_NAME} ft)
 target_include_directories(${PROJECT_NAME} PRIVATE ./include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${ft_INCLUDES})

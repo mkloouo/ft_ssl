@@ -78,11 +78,11 @@ static size_t		ssl_parse_flags(t_ssl_flags *flags, char **av)
 	while (av[i])
 	{
 		if (ft_strequ(av[i], "-p"))
-			flags->is_p = 1;
+			flags->p_flag = 1;
 		else if (ft_strequ(av[i], "-q"))
-			flags->is_q = 1;
+			flags->q_flag = 1;
 		else if (ft_strequ(av[i], "-r"))
-			flags->is_r = 1;
+			flags->r_flag = 1;
 		else
 			break ;
 		++i;
@@ -96,7 +96,7 @@ static void			ssl_run_stdin(t_hash_fn_name *fn_name, t_ssl_flags *flags)
 	char			*digest;
 
 	stdin_contents = ft_readfd(IO_STDIN);
-	if (flags->is_p)
+	if (flags->p_flag)
 		ft_printf("%s", stdin_contents);
 	digest = fn_name->fn(stdin_contents);
 	ft_printf("%s\n", digest);
@@ -116,9 +116,9 @@ static void			ssl_run_string(t_hash_fn_name *fn_name, t_ssl_flags *flags,
 	char			*digest;
 
 	digest = fn_name->fn(string);
-	if (!flags->is_q)
+	if (!flags->q_flag)
 	{
-		if (flags->is_r)
+		if (flags->r_flag)
 			ft_printf("%s \"%s\"\n", digest, string);
 		else
 			ft_printf("%s (\"%s\") = %s\n", fn_name->uc_name, string, digest);
@@ -164,9 +164,9 @@ static void			ssl_run_file(t_ssl *ssl, char const *file)
 	if (!context)
 		return ;
 	digest = ssl->fn_name.fn(context);
-	if (!ssl->flags.is_q)
+	if (!ssl->flags.q_flag)
 	{
-		if (ssl->flags.is_r)
+		if (ssl->flags.r_flag)
 			ft_printf("%s %s\n", digest, file);
 		else
 			ft_printf("%s (%s) = %s\n", ssl->fn_name.uc_name, file, digest);
@@ -213,8 +213,8 @@ int					main(int ac, char **av)
 	if (!ssl_get_hash_fn_name(&ssl.fn_name, av[1]))
 		return (ssl_print_invalid_fn(ssl.program, av[1]));
 	i = ssl_parse_flags(&ssl.flags, av);
-	if (ac == (2 + ssl.flags.is_p + ssl.flags.is_q + ssl.flags.is_r)
-		|| ssl.flags.is_p)
+	if (ac == (2 + ssl.flags.p_flag + ssl.flags.q_flag + ssl.flags.r_flag)
+		|| ssl.flags.p_flag)
 		ssl_run_stdin(&ssl.fn_name, &ssl.flags);
 	ssl_run_args(&ssl, i, av);
 	return (0);
