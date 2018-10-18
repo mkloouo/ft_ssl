@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/11 21:29:46 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/18 06:42:50 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/18 07:04:36 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,9 +45,9 @@ typedef struct			s_hash_fn_name
 
 typedef struct			s_ssl_flags
 {
-	unsigned			p_flag:1;
-	unsigned			q_flag:1;
-	unsigned			r_flag:1;
+	int					p_flag;
+	int					q_flag;
+	int					r_flag;
 }						t_ssl_flags;
 
 typedef struct			s_ssl

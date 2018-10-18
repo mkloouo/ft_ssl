@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/18 06:31:10 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/18 06:31:41 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/18 07:05:55 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,11 @@ size_t		ssl_parse_flags(t_ssl_flags *flags, char **av)
 	while (av[i])
 	{
 		if (ft_strequ(av[i], "-p"))
-			flags->p_flag = 1;
+			flags->p_flag += 1;
 		else if (ft_strequ(av[i], "-q"))
-			flags->q_flag = 1;
+			flags->q_flag += 1;
 		else if (ft_strequ(av[i], "-r"))
-			flags->r_flag = 1;
+			flags->r_flag += 1;
 		else
 			break ;
 		++i;
