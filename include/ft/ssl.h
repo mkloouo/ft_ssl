@@ -102,7 +102,6 @@ void					ssl_run_args(t_ssl *ssl, size_t i, char **av);
 ** ssl_print.c
 */
 
-int						ssl_print_usage(char const *program);
 void					ssl_print_md_cmds(void);
 void					ssl_print_c_cmds(void);
 

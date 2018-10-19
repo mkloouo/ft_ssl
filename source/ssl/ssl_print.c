@@ -14,12 +14,6 @@
 
 #include <ft/io.h>
 
-int			ssl_print_usage(char const *program)
-{
-	ft_printf("Usage: %s command [command opts] [command args]\n", program);
-	return (1);
-}
-
 void		ssl_print_md_cmds(void)
 {
 	size_t	i;
