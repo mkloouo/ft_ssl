@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/18 06:24:35 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/18 06:27:49 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/19 03:31:59 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,12 @@ void			ssl_run_stdin(t_hash_fn_name *fn_name, t_ssl_flags *flags)
 {
 	char		*stdin_contents;
 	char		*digest;
+	size_t		len;
 
-	stdin_contents = ft_readfd(IO_STDIN);
+	stdin_contents = ft_readfd(IO_STDIN, &len);
 	if (flags && flags->p_flag)
 		ft_printf("%s", stdin_contents);
-	digest = fn_name->fn(stdin_contents);
+	digest = fn_name->fn(stdin_contents, len);
 	ft_printf("%s\n", digest);
 	free(stdin_contents);
 	free(digest);
@@ -38,7 +39,7 @@ void			ssl_run_string(t_hash_fn_name *fn_name, t_ssl_flags *flags,
 {
 	char		*digest;
 
-	digest = fn_name->fn(string);
+	digest = fn_name->fn(string, ft_strlen(string));
 	if (!flags->q_flag)
 	{
 		if (flags->r_flag)
@@ -52,7 +53,7 @@ void			ssl_run_string(t_hash_fn_name *fn_name, t_ssl_flags *flags,
 }
 
 static char		*ssl_handle_context_from_file(t_ssl *ssl,
-				char const *file, int *fd)
+				char const *file, int *fd, size_t *len)
 {
 	char		*context;
 
@@ -62,7 +63,7 @@ static char		*ssl_handle_context_from_file(t_ssl *ssl,
 		ssl_print_file_error(ssl, file, strerror(errno));
 		return (0);
 	}
-	context = ft_readfd(*fd);
+	context = ft_readfd(*fd, len);
 	if (context == 0)
 	{
 		ssl_print_file_error(ssl, file, strerror(errno));
@@ -76,11 +77,12 @@ void			ssl_run_file(t_ssl *ssl, char const *file)
 	char		*context;
 	char		*digest;
 	int			fd;
+	size_t		len;
 
-	context = ssl_handle_context_from_file(ssl, file, &fd);
+	context = ssl_handle_context_from_file(ssl, file, &fd, &len);
 	if (!context)
 		return ;
-	digest = ssl->fn_name.fn(context);
+	digest = ssl->fn_name.fn(context, len);
 	if (!ssl->flags.q_flag)
 	{
 		if (ssl->flags.r_flag)

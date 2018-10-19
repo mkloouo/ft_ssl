@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/11 21:23:31 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/18 06:21:14 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/19 03:41:13 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,9 @@ uint32_t const g_sha256_constants[] = {
 	0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-void			sha256_init_ctx(t_sha256ctx *ctx, char const *data)
+void			sha256_init_ctx(t_sha256ctx *ctx, char const *data, size_t len)
 {
-	init_ctx_data(&ctx->data, data, FALSE);
+	init_ctx_data(&ctx->data, data, len, FALSE);
 	ctx->state[0] = 0x6a09e667;
 	ctx->state[1] = 0xbb67ae85;
 	ctx->state[2] = 0x3c6ef372;
@@ -96,7 +96,7 @@ char			*sha256_get_digest(t_sha256ctx *ctx)
 	return (digest);
 }
 
-char			*ft_sha256(char const *data)
+char			*ft_sha256(char const *data, size_t ctx_len)
 {
 	uint64_t	chunk_move;
 	uint32_t	chunk[64];
@@ -104,7 +104,7 @@ char			*ft_sha256(char const *data)
 	uint32_t	ts[8];
 	char		*digest;
 
-	sha256_init_ctx(&ctx, data);
+	sha256_init_ctx(&ctx, data, ctx_len);
 	chunk_move = 0;
 	while (chunk_move < ctx.data.len)
 	{

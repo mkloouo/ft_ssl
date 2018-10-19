@@ -6,13 +6,14 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/18 04:21:25 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/18 04:22:03 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/19 03:37:40 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft/ssl.h>
 
 #include <ft/string.h>
+#include <ft/memory.h>
 
 static void		init_ctx_data_h(t_ctx_data *ctx_data, char const *data,
 				uint64_t data_len)
@@ -23,22 +24,20 @@ static void		init_ctx_data_h(t_ctx_data *ctx_data, char const *data,
 	ctx_data->bitlen += 64;
 	ctx_data->len = ctx_data->bitlen / 8;
 	ctx_data->ctx = (uint8_t*)ft_strnew(ctx_data->len, 0);
-	ft_strncpy((char*)ctx_data->ctx, data, data_len);
+	ft_memcpy((char*)ctx_data->ctx, data, data_len);
 	ctx_data->ctx[data_len] = (uint8_t)0x80;
 }
 
 void			init_ctx_data(t_ctx_data *ctx_data, char const *data,
-				t_bool little_endian)
+				size_t len, t_bool little_endian)
 {
-	uint64_t	data_len;
 	uint64_t	data_bitlen;
 	int16_t		from;
 	int16_t		to;
 	int16_t		bit_step;
 
-	data_len = ft_strlen(data);
-	data_bitlen = data_len * 8;
-	init_ctx_data_h(ctx_data, data, data_len);
+	data_bitlen = len * 8;
+	init_ctx_data_h(ctx_data, data, len);
 	from = (int16_t)(little_endian ? 8 : 1);
 	to = (int16_t)(little_endian ? 1 : 8);
 	bit_step = 0;

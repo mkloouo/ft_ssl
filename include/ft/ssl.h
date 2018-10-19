@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/11 21:29:46 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/18 07:04:36 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/19 03:39:05 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 # define MD5_I(B, C, D) (C ^ (B | (~D)))
 # define MD5_II(B, C, D, F, G, I) F = MD5_I(B, C, D); G = (7 * I) % 16
 
-typedef char			*(*t_hash_fn)(char const*);
+typedef char			*(*t_hash_fn)(char const*, size_t);
 
 typedef struct			s_hash_fn_name
 {
@@ -129,19 +129,20 @@ size_t					ssl_parse_flags(t_ssl_flags *flags, char **av);
 */
 
 void					init_ctx_data(t_ctx_data *ctx_data, char const *data,
-						t_bool little_endian);
+						size_t len, t_bool little_endian);
 
 /*
 ** ft_sha256.c
 ** ft_sha256_update_state.c
 */
 
-char					*ft_sha256(char const *ctx);
-void					sha256_init_ctx(t_sha256ctx *ctx, char const *data);
-void					sha256_update_state(t_sha256ctx *ctx, uint32_t *ts,
-						uint32_t const *chunk);
+char					*ft_sha256(char const *ctx, size_t ctx_len);
+void					sha256_init_ctx(t_sha256ctx *ctx, char const *data,
+						size_t len);
 void					sha256_fill_chunk(uint32_t *chunk, uint64_t chunk_move,
 						t_sha256ctx *ctx);
+void					sha256_update_state(t_sha256ctx *ctx, uint32_t *ts,
+						uint32_t const *chunk);
 char					*sha256_get_digest(t_sha256ctx *ctx);
 
 /*
@@ -149,8 +150,9 @@ char					*sha256_get_digest(t_sha256ctx *ctx);
 ** ft_md5_update_state.c
 */
 
-char					*ft_md5(char const *ctx);
-void					ft_md5_init_ctx(t_md5ctx *ctx, char const *data);
+char					*ft_md5(char const *ctx, size_t ctx_len);
+void					ft_md5_init_ctx(t_md5ctx *ctx, char const *data,
+						size_t len);
 void					ft_md5_fill_chunk(uint32_t *chunk, uint64_t chunk_move,
 						t_md5ctx *ctx);
 void					ft_md5_update_state(t_md5ctx *ctx,

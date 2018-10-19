@@ -6,7 +6,7 @@
 /*   By: modnosum <modnosum@gmail.com>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/13 14:30:17 by modnosum          #+#    #+#             */
-/*   Updated: 2018/10/18 05:39:03 by modnosum         ###   ########.fr       */
+/*   Updated: 2018/10/19 03:38:55 by modnosum         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,9 @@ uint32_t const	g_md5_constants[] = {
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
 
-void			ft_md5_init_ctx(t_md5ctx *ctx, char const *data)
+void			ft_md5_init_ctx(t_md5ctx *ctx, char const *data, size_t len)
 {
-	init_ctx_data(&ctx->data, data, TRUE);
+	init_ctx_data(&ctx->data, data, len, TRUE);
 	ctx->state[0] = 0x67452301;
 	ctx->state[1] = 0xefcdab89;
 	ctx->state[2] = 0x98badcfe;
@@ -95,7 +95,7 @@ char			*ft_md5_get_digest(t_md5ctx *ctx)
 	return (digest);
 }
 
-char			*ft_md5(char const *data)
+char			*ft_md5(char const *data, size_t ctx_len)
 {
 	uint64_t	chunk_move;
 	uint32_t	chunk[16];
@@ -103,7 +103,7 @@ char			*ft_md5(char const *data)
 	uint32_t	ts[4];
 	char		*digest;
 
-	ft_md5_init_ctx(&ctx, data);
+	ft_md5_init_ctx(&ctx, data, ctx_len);
 	ft_memset(chunk, 0, sizeof(uint32_t) * 16);
 	chunk_move = 0;
 	while (chunk_move < ctx.data.len)
